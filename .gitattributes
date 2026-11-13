@@ -1,0 +1,16 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Windows scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Committed bundles
+dist/** -diff linguist-generated=true
+package-lock.json -diff linguist-generated=true
+
+# Binary
+*.png binary
+*.jpg binary
+*.gif binary

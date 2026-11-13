@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build / test output
+coverage/
+lib/
+*.tsbuildinfo
+junit.xml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local brief (not part of the repo)
+aenbt.mf

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Rebuild and stage dist/ when anything that affects the bundle is staged.
+set -euo pipefail
+
+if git diff --cached --name-only | grep -qE '^(src/|package(-lock)?\.json$|rollup\.config\.mjs$|tsconfig(\.build)?\.json$)'; then
+  echo "pre-commit: rebuilding dist/"
+  npm run --silent package >/dev/null
+  git add dist
+fi
