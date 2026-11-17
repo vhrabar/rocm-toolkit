@@ -6,7 +6,7 @@
   "type": "module",
   "main": "dist/index.js",
   "engines": {
-    "node": ">=26"
+    "node": ">=24"
   },
   "keywords": [
     "github-actions",
@@ -43,7 +43,7 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.6.6",
+    "@types/node": "^24.19.2",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "jest": "^30.5.2",

@@ -1,0 +1,46 @@
+name: Setup ROCm (unofficial)
+description: >-
+  Unofficial action that installs AMD ROCm / HIP SDK on Linux and Windows
+  runners. Pick a version and GPU target, get hipcc on PATH. Not affiliated
+  with AMD.
+author: vhrabar
+branding:
+  icon: cpu
+  color: gray-dark
+
+inputs:
+  version:
+    description: >-
+      ROCm version to install, for example 10.1.0. Must be in the supported
+      list.
+    required: false
+  gfx:
+    description: >-
+      GPU target(s), for example gfx1200. Comma-separated for several.
+      Use `all` for all-architecture packages (very large).
+    required: false
+    default: all
+  components:
+    description: >-
+      Linux 10.x only. Comma-separated: runtime, dev, sdk, developer-tools,
+      opencl.
+    required: false
+    default: dev
+  use-cache:
+    description: Cache the downloaded installer or tarball where possible.
+    required: false
+    default: 'true'
+  log-file-suffix:
+    description: Suffix of the Windows installer log file name.
+    required: false
+    default: log.txt
+
+outputs:
+  ROCM_PATH:
+    description: Absolute path of the ROCm installation root.
+  version:
+    description: The ROCm version that was installed.
+
+runs:
+  using: node24
+  main: dist/index.js
