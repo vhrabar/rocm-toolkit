@@ -159,8 +159,8 @@ describe('installMultiArch with dnf', () => {
 
   it('runs the whole flow as root, with RPM package names', async () => {
     notInstalled = ['gnupg2'] // as on almalinux:10
-    const prefix = await installMultiArch(inputs, 'rhel10', dnf)
-    expect(prefix).toBe('/opt/rocm/core-10.1')
+    const result = await installMultiArch(inputs, 'rhel10', dnf)
+    expect(result).toEqual({ root: '/opt/rocm/core-10.1', cacheHit: false })
     expect(calls()).toEqual([
       [...DNF_INSTALL, 'gnupg2'],
       [

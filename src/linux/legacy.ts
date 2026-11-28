@@ -3,6 +3,7 @@ import * as tc from '@actions/tool-cache'
 import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
+import type { InstallResult } from '../cache.js'
 import type { Component, Inputs } from '../inputs.js'
 import { parseVersion } from '../versions.js'
 import { APT_GET, ensurePackages } from './apt.js'
@@ -80,11 +81,11 @@ export function legacyPackages(components: readonly Component[]): string[] {
   ]
 }
 
-/** Install ROCm 7.2.x and older from repo.radeon.com. Returns the prefix. */
+/** Install ROCm 7.2.x and older from repo.radeon.com. */
 export async function installLegacy(
   inputs: Inputs,
   distro: string
-): Promise<string> {
+): Promise<InstallResult> {
   const codename = codenameFor(distro)
   if (inputs.gfx.length > 0) {
     core.warning(
@@ -123,5 +124,5 @@ export async function installLegacy(
 
   const prefix = legacyPrefix(inputs.version)
   requireHipcc(prefix)
-  return prefix
+  return { root: prefix, cacheHit: false }
 }

@@ -46,7 +46,7 @@ describe('mergeLibraryPath', () => {
 
 describe('applyEnv', () => {
   it('exports variables, PATH and outputs on linux', () => {
-    applyEnv(buildEnv('/opt/rocm', 'linux'), 'linux', '10.1.0')
+    applyEnv(buildEnv('/opt/rocm', 'linux'), 'linux', '10.1.0', false)
     expect(core.exportVariable).toHaveBeenCalledWith('ROCM_PATH', '/opt/rocm')
     expect(core.exportVariable).toHaveBeenCalledWith('HIP_PATH', '/opt/rocm')
     expect(core.addPath).toHaveBeenCalledWith('/opt/rocm/bin')
@@ -55,10 +55,16 @@ describe('applyEnv', () => {
       expect.stringContaining('/opt/rocm/lib')
     )
     expect(core.setOutput).toHaveBeenCalledWith('version', '10.1.0')
+    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', 'false')
+  })
+
+  it('sets cache-hit to true on a hit', () => {
+    applyEnv(buildEnv('/opt/rocm', 'linux'), 'linux', '10.1.0', true)
+    expect(core.setOutput).toHaveBeenCalledWith('cache-hit', 'true')
   })
 
   it('exports HIP_DEVICE_LIB_PATH on windows', () => {
-    applyEnv(buildEnv('C:\\r', 'windows'), 'windows', '10.1.0')
+    applyEnv(buildEnv('C:\\r', 'windows'), 'windows', '10.1.0', false)
     expect(core.exportVariable).toHaveBeenCalledWith(
       'HIP_DEVICE_LIB_PATH',
       'C:\\r\\lib\\llvm\\amdgcn\\bitcode'
@@ -67,7 +73,7 @@ describe('applyEnv', () => {
 
   it('does not export HIP_DEVICE_LIB_PATH on linux', () => {
     core.exportVariable.mockClear()
-    applyEnv(buildEnv('/opt/rocm/core-10.1', 'linux'), 'linux', '10.1.0')
+    applyEnv(buildEnv('/opt/rocm/core-10.1', 'linux'), 'linux', '10.1.0', false)
     expect(core.exportVariable).not.toHaveBeenCalledWith(
       'HIP_DEVICE_LIB_PATH',
       expect.anything()
@@ -75,7 +81,7 @@ describe('applyEnv', () => {
   })
 
   it('does not set LD_LIBRARY_PATH on windows', () => {
-    applyEnv(buildEnv('C:\\r', 'windows'), 'windows', '6.2.2')
+    applyEnv(buildEnv('C:\\r', 'windows'), 'windows', '6.2.2', false)
     expect(core.exportVariable).not.toHaveBeenCalledWith(
       'LD_LIBRARY_PATH',
       expect.anything()

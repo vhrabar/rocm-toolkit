@@ -40,6 +40,10 @@ outputs:
     description: Absolute path of the ROCm installation root.
   version:
     description: The ROCm version that was installed.
+  cache-hit:
+    description: >-
+      'true' if ROCm came from the Actions cache or from an install already
+      on the runner, otherwise 'false'.
 
 runs:
   using: node24

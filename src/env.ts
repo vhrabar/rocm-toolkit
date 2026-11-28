@@ -37,7 +37,12 @@ export function mergeLibraryPath(
   return [libDir, ...parts.filter((s) => s !== libDir)].join(':')
 }
 
-export function applyEnv(env: RocmEnv, os: Os, version: string): void {
+export function applyEnv(
+  env: RocmEnv,
+  os: Os,
+  version: string,
+  cacheHit: boolean
+): void {
   core.exportVariable('ROCM_PATH', env.rocmPath)
   core.exportVariable('HIP_PATH', env.hipPath)
   if (env.deviceLibPath) {
@@ -52,4 +57,5 @@ export function applyEnv(env: RocmEnv, os: Os, version: string): void {
   }
   core.setOutput('ROCM_PATH', env.rocmPath)
   core.setOutput('version', version)
+  core.setOutput('cache-hit', String(cacheHit))
 }

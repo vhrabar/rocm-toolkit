@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as path from 'node:path'
+import type { InstallResult } from './cache.js'
 import type { Inputs } from './inputs.js'
 import {
   TARBALL_BASE,
@@ -44,11 +45,11 @@ export const defaultFetcher: Fetcher = {
   }
 }
 
-/** Install the ROCm 10.x tarball on Windows. Returns the install prefix. */
+/** Install the ROCm 10.x tarball on Windows. */
 export async function installWindows(
   inputs: Inputs,
   fetcher: Fetcher = defaultFetcher
-): Promise<string> {
+): Promise<InstallResult> {
   const family = windowsFamily(inputs.gfx)
   const prefix = windowsPrefix(inputs.version, process.env['SystemDrive'])
   const hipcc = path.win32.join(prefix, 'bin', 'hipcc.exe')
@@ -71,5 +72,5 @@ export async function installWindows(
     },
     fetcher
   )
-  return prefix
+  return { root: prefix, cacheHit: false }
 }

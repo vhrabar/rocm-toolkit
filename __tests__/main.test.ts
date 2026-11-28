@@ -1,11 +1,15 @@
 import { jest } from '@jest/globals'
+import type { InstallResult } from '../src/cache.js'
 import type { Platform } from '../src/platform.js'
 
 const core = {
   getInput: jest.fn<(name: string) => string>(),
   info: jest.fn(),
   warning: jest.fn(),
-  setFailed: jest.fn()
+  setFailed: jest.fn(),
+  exportVariable: jest.fn(),
+  addPath: jest.fn(),
+  setOutput: jest.fn()
 }
 jest.unstable_mockModule('@actions/core', () => core)
 jest.unstable_mockModule('../src/windows.js', () => ({
@@ -14,9 +18,11 @@ jest.unstable_mockModule('../src/windows.js', () => ({
 jest.unstable_mockModule('../src/linux/legacy.js', () => ({
   installLegacy: jest.fn()
 }))
-const installMultiArch = jest.fn<(...args: unknown[]) => Promise<string>>()
+const installMultiArch =
+  jest.fn<(...args: unknown[]) => Promise<InstallResult>>()
 jest.unstable_mockModule('../src/linux/index.js', () => ({ installMultiArch }))
-const installLinuxTarball = jest.fn<(...args: unknown[]) => Promise<string>>()
+const installLinuxTarball =
+  jest.fn<(...args: unknown[]) => Promise<InstallResult>>()
 jest.unstable_mockModule('../src/linux/tarball.js', () => ({
   installLinuxTarball
 }))
@@ -117,6 +123,27 @@ describe('run', () => {
       expect.anything()
     )
   })
+
+  it.each([true, false])(
+    'exports the result and cache-hit=%s after an install',
+    async (cacheHit) => {
+      core.getInput.mockImplementation(
+        (name) => (raw as Record<string, string>)[name] ?? ''
+      )
+      detectPlatform.mockReturnValue(linux)
+      installMultiArch.mockResolvedValueOnce({
+        root: '/opt/rocm/core-10.1',
+        cacheHit
+      })
+      await run()
+      expect(core.setFailed).not.toHaveBeenCalled()
+      expect(core.setOutput).toHaveBeenCalledWith(
+        'ROCM_PATH',
+        '/opt/rocm/core-10.1'
+      )
+      expect(core.setOutput).toHaveBeenCalledWith('cache-hit', String(cacheHit))
+    }
+  )
 
   it('adds the install context when an install fails', async () => {
     core.getInput.mockImplementation(

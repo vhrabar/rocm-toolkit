@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as fs from 'node:fs'
 import * as os from 'node:os'
+import type { InstallResult } from './cache.js'
 import { parseInputs, type Inputs } from './inputs.js'
 import { failureMessage } from './context.js'
 import { applyEnv, buildEnv } from './env.js'
@@ -9,7 +10,7 @@ import { installMultiArch } from './linux/index.js'
 import { packageManagerFor } from './linux/managers.js'
 import { installLinuxTarball } from './linux/tarball.js'
 import { installWindows } from './windows.js'
-import { detectPlatform, type Platform } from './platform.js'
+import { detectPlatform, type Os, type Platform } from './platform.js'
 import { parseVersion, selectScheme, type Scheme } from './versions.js'
 
 export interface Plan {
@@ -77,6 +78,11 @@ export function makePlan(
   return { inputs, platform, scheme }
 }
 
+/** Export the environment and outputs for a finished install. */
+function finish(result: InstallResult, os: Os, plan: Plan): void {
+  applyEnv(buildEnv(result.root, os), os, plan.inputs.version, result.cacheHit)
+}
+
 export async function run(): Promise<void> {
   let plan: Plan | undefined
   try {
@@ -93,20 +99,25 @@ export async function run(): Promise<void> {
       core.warning(
         `${plan.platform.noPackageRepo} Installing the ROCm tarball instead.`
       )
-      const root = await installLinuxTarball(plan.inputs)
-      applyEnv(buildEnv(root, 'linux'), 'linux', plan.inputs.version)
+      finish(await installLinuxTarball(plan.inputs), 'linux', plan)
       return
     }
     if (plan.platform.os === 'linux' && plan.scheme === 'multiarch') {
       const pm = packageManagerFor(plan.platform.packageManager)
       if (!pm) throw new Error('No package manager for this distro.') // makePlan checked
-      const root = await installMultiArch(plan.inputs, plan.platform.distro, pm)
-      applyEnv(buildEnv(root, 'linux'), 'linux', plan.inputs.version)
+      finish(
+        await installMultiArch(plan.inputs, plan.platform.distro, pm),
+        'linux',
+        plan
+      )
       return
     }
     if (plan.platform.os === 'linux' && plan.scheme === 'legacy') {
-      const root = await installLegacy(plan.inputs, plan.platform.distro)
-      applyEnv(buildEnv(root, 'linux'), 'linux', plan.inputs.version)
+      finish(
+        await installLegacy(plan.inputs, plan.platform.distro),
+        'linux',
+        plan
+      )
       return
     }
     if (plan.platform.os === 'windows') {
@@ -116,8 +127,7 @@ export async function run(): Promise<void> {
             `this action. Windows supports ROCm 10.x only.`
         )
       }
-      const root = await installWindows(plan.inputs)
-      applyEnv(buildEnv(root, 'windows'), 'windows', plan.inputs.version)
+      finish(await installWindows(plan.inputs), 'windows', plan)
       return
     }
     throw new Error(`No install flow for ${plan.platform.os} / ${plan.scheme}.`)

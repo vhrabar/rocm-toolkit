@@ -107,9 +107,10 @@ describe('installLinuxTarball', () => {
 
   it('installs into /opt/rocm/core-X.Y as root', async () => {
     getuid.mockReturnValue(0)
-    await expect(tarball.installLinuxTarball(inputs)).resolves.toBe(
-      '/opt/rocm/core-10.1'
-    )
+    await expect(tarball.installLinuxTarball(inputs)).resolves.toEqual({
+      root: '/opt/rocm/core-10.1',
+      cacheHit: false
+    })
     expect(installTarball).toHaveBeenCalledWith(
       expect.objectContaining({
         url: 'https://stable.repo.amd.com/rocm/core/tarball/therock-dist-linux-gfx120X-all-10.1.0.tar.gz',
@@ -124,9 +125,10 @@ describe('installLinuxTarball', () => {
 
   it('installs into the tool cache without root', async () => {
     getuid.mockReturnValue(1001)
-    await expect(tarball.installLinuxTarball(inputs)).resolves.toBe(
-      '/opt/hostedtoolcache/rocm/core-10.1'
-    )
+    await expect(tarball.installLinuxTarball(inputs)).resolves.toEqual({
+      root: '/opt/hostedtoolcache/rocm/core-10.1',
+      cacheHit: false
+    })
   })
 
   it('warns about ignored components and missing host tools, then installs', async () => {

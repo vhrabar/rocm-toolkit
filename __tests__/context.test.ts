@@ -1,3 +1,4 @@
+import { packageKey } from '../src/cache.js'
 import { describePlan, failureMessage } from '../src/context.js'
 import type { Plan } from '../src/main.js'
 
@@ -25,8 +26,17 @@ describe('describePlan', () => {
       'ROCm:     10.1.0 (multiarch flow)',
       'Platform: linux x64, ubuntu2404 (apt)',
       'Repo:     https://stable.repo.amd.com/rocm/core/packages/ubuntu2404',
-      'Packages: amdrocm-core-dev10.1-gfx1200'
+      'Packages: amdrocm-core-dev10.1-gfx1200',
+      `Cache:    ${packageKey('ubuntu2404', 'apt', '10.1.0', ['amdrocm-core-dev10.1-gfx1200'])}`
     ])
+  })
+
+  it('says when the cache is disabled', () => {
+    expect(
+      describePlan({ ...multiarch, inputs: { ...inputs, useCache: false } }).at(
+        -1
+      )
+    ).toBe('Cache:    disabled (use-cache: false)')
   })
 
   it('lists the installer listing and packages for the legacy flow', () => {
@@ -40,7 +50,8 @@ describe('describePlan', () => {
       'ROCm:     7.2.4 (legacy flow)',
       'Platform: linux x64, ubuntu2404 (apt)',
       'Installer from: https://repo.radeon.com/amdgpu-install/7.2.4/ubuntu/noble/',
-      'Packages: rocm-hip-runtime-dev libxml2'
+      'Packages: rocm-hip-runtime-dev libxml2',
+      `Cache:    ${packageKey('ubuntu2404', 'legacy', '7.2.4', ['rocm-hip-runtime-dev', 'libxml2'])}`
     ])
   })
 
@@ -53,7 +64,8 @@ describe('describePlan', () => {
     ).toEqual([
       'ROCm:     10.1.0 (multiarch flow)',
       'Platform: windows x64',
-      'Tarball:  https://stable.repo.amd.com/rocm/core/tarball/therock-dist-windows-gfx120X-all-10.1.0.tar.gz'
+      'Tarball:  https://stable.repo.amd.com/rocm/core/tarball/therock-dist-windows-gfx120X-all-10.1.0.tar.gz',
+      'Cache:    setup-rocm-v1-windows-gfx120X-all-10.1.0'
     ])
   })
 
@@ -71,7 +83,8 @@ describe('describePlan', () => {
       'ROCm:     10.1.0 (multiarch flow)',
       'Platform: linux x64, rhel9 (dnf)',
       'Repo:     https://stable.repo.amd.com/rocm/core/packages/rhel9/x86_64/',
-      'Packages: amdrocm-core-devel10.1-gfx1200'
+      'Packages: amdrocm-core-devel10.1-gfx1200',
+      `Cache:    ${packageKey('rhel9', 'dnf', '10.1.0', ['amdrocm-core-devel10.1-gfx1200'])}`
     ])
   })
 
@@ -88,7 +101,8 @@ describe('describePlan', () => {
     ).toEqual([
       'Platform: linux x64, sles15 (zypper)',
       'Repo:     https://stable.repo.amd.com/rocm/core/packages/sles15/x86_64/',
-      'Packages: amdrocm-core-devel10.1-gfx1200'
+      'Packages: amdrocm-core-devel10.1-gfx1200',
+      `Cache:    ${packageKey('sles15', 'zypper', '10.1.0', ['amdrocm-core-devel10.1-gfx1200'])}`
     ])
   })
 
@@ -96,7 +110,8 @@ describe('describePlan', () => {
     const platform = { ...multiarch.platform, packageManager: undefined }
     expect(describePlan({ ...multiarch, platform }).slice(2)).toEqual([
       'Repo:     (unknown: no package manager detected)',
-      'Packages: (unknown: no package manager detected)'
+      'Packages: (unknown: no package manager detected)',
+      'Cache:    (unknown: no package manager detected)'
     ])
   })
 
@@ -114,7 +129,8 @@ describe('describePlan', () => {
     ).toEqual([
       'ROCm:     10.1.0 (multiarch flow)',
       'Platform: linux x64, no AMD package repo (tarball)',
-      'Tarball:  https://stable.repo.amd.com/rocm/core/tarball/therock-dist-linux-gfx120X-all-10.1.0.tar.gz'
+      'Tarball:  https://stable.repo.amd.com/rocm/core/tarball/therock-dist-linux-gfx120X-all-10.1.0.tar.gz',
+      'Cache:    setup-rocm-v1-linux-gfx120X-all-10.1.0'
     ])
   })
 
@@ -149,7 +165,8 @@ describe('failureMessage', () => {
         'ROCm:     10.1.0 (multiarch flow)',
         'Platform: linux x64, ubuntu2404 (apt)',
         'Repo:     https://stable.repo.amd.com/rocm/core/packages/ubuntu2404',
-        'Packages: amdrocm-core-dev10.1-gfx1200'
+        'Packages: amdrocm-core-dev10.1-gfx1200',
+        `Cache:    ${packageKey('ubuntu2404', 'apt', '10.1.0', ['amdrocm-core-dev10.1-gfx1200'])}`
       ].join('\n')
     )
   })

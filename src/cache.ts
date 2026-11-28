@@ -31,6 +31,14 @@ export function packageKey(
   return `${PREFIX}-${distro}-${pm}-${version}-${hash}`
 }
 
+/** What every install flow returns. */
+export interface InstallResult {
+  /** The ROCm root. */
+  root: string
+  /** True if ROCm came from the Actions cache or an existing install. */
+  cacheHit: boolean
+}
+
 /**
  * What the install flows use to talk to the Actions cache. Neither method
  * throws: a cache problem must never fail the step.
