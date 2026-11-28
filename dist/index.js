@@ -40789,11 +40789,18 @@ function spawnTar(tar, args) {
     });
     return { stdin: child.stdin, done };
 }
-/** Stream the download straight into tar */
-async function downloadAndExtract(url, dest, fetcher) {
+/**
+ * Stream the download straight into tar. With `archive`, also write a copy
+ * of the download there, for the cache. Returns true if `archive` now holds
+ * the whole download.
+ */
+async function downloadAndExtract(url, dest, fetcher, archive) {
     const body = await fetcher.get(url);
     const tar = fetcher.spawnTar(['-xzf', '-', '-C', dest]);
-    await Promise.all([pipeline(body, tar.stdin), tar.done]);
+    {
+        await Promise.all([pipeline(body, tar.stdin), tar.done]);
+        return false;
+    }
 }
 
 /**
