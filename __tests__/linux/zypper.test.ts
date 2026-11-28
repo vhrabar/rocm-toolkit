@@ -141,8 +141,8 @@ describe('installMultiArch with zypper', () => {
   }
 
   it('runs the whole flow as root, with RPM package names', async () => {
-    const prefix = await installMultiArch(inputs, 'sles15', zypper)
-    expect(prefix).toBe('/opt/rocm/core-10.1')
+    const result = await installMultiArch(inputs, 'sles15', zypper)
+    expect(result).toEqual({ root: '/opt/rocm/core-10.1', cacheHit: false })
     expect(calls()).toEqual([
       ['rpm', '--import', '/tmp/key.gpg'],
       [

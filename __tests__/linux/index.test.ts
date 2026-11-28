@@ -184,8 +184,8 @@ describe('installMultiArch', () => {
   })
 
   it('configures apt, installs packages and returns the prefix', async () => {
-    const prefix = await installMultiArch(inputs, 'ubuntu2404', apt)
-    expect(prefix).toBe('/opt/rocm/core-10.1')
+    const result = await installMultiArch(inputs, 'ubuntu2404', apt)
+    expect(result).toEqual({ root: '/opt/rocm/core-10.1', cacheHit: false })
     const calls = execMock.exec.mock.calls.map(([cmd, args]) => [
       cmd,
       ...(args ?? [])

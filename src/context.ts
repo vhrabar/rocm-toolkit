@@ -1,3 +1,4 @@
+import { packageKey, tarballKey } from './cache.js'
 import { codenameFor, legacyPackages, listingUrl } from './linux/legacy.js'
 import { packageNames, repoUrl } from './linux/packages.js'
 import { linuxFamily, linuxTarballUrl } from './linux/tarball.js'
@@ -23,11 +24,18 @@ function safe(fn: () => string): string {
 export function describePlan(plan: Plan): string[] {
   const { inputs, platform, scheme } = plan
   const lines = [`ROCm:     ${inputs.version} (${scheme} flow)`]
+  const cacheLine = (key: () => string): string =>
+    `Cache:    ${inputs.useCache ? safe(key) : 'disabled (use-cache: false)'}`
 
   if (platform.os === 'windows') {
     lines.push(`Platform: windows ${platform.arch}`)
     lines.push(
       `Tarball:  ${safe(() => tarballUrl(inputs.version, windowsFamily(inputs.gfx)))}`
+    )
+    lines.push(
+      cacheLine(() =>
+        tarballKey('windows', windowsFamily(inputs.gfx), inputs.version)
+      )
     )
     return lines
   }
@@ -38,6 +46,11 @@ export function describePlan(plan: Plan): string[] {
     )
     lines.push(
       `Tarball:  ${safe(() => linuxTarballUrl(inputs.version, linuxFamily(inputs.gfx)))}`
+    )
+    lines.push(
+      cacheLine(() =>
+        tarballKey('linux', linuxFamily(inputs.gfx), inputs.version)
+      )
     )
     return lines
   }
@@ -50,7 +63,13 @@ export function describePlan(plan: Plan): string[] {
     lines.push(
       `Installer from: ${safe(() => listingUrl(inputs.version, codenameFor(platform.distro)))}`
     )
-    lines.push(`Packages: ${legacyPackages(inputs.components).join(' ')}`)
+    const packages = legacyPackages(inputs.components)
+    lines.push(`Packages: ${packages.join(' ')}`)
+    lines.push(
+      cacheLine(() =>
+        packageKey(platform.distro, 'legacy', inputs.version, packages)
+      )
+    )
   } else {
     const pm = platform.packageManager
     lines.push(
@@ -69,6 +88,17 @@ export function describePlan(plan: Plan): string[] {
           pm
         ).join(' ')
       })}`
+    )
+    lines.push(
+      cacheLine(() => {
+        if (!pm) throw new Error('no package manager detected')
+        return packageKey(
+          platform.distro,
+          pm,
+          inputs.version,
+          packageNames(inputs.version, inputs.gfx, inputs.components, pm)
+        )
+      })
     )
   }
   return lines

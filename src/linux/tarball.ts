@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as path from 'node:path'
+import type { InstallResult } from '../cache.js'
 import type { Inputs } from '../inputs.js'
 import {
   TARBALL_BASE,
@@ -75,13 +76,12 @@ export async function hostToolWarnings(): Promise<string[]> {
 }
 
 /**
- * Install the ROCm 10.x Linux tarball, for distros without an AMD repo
- * Returns the install prefix.
+ * Install the ROCm 10.x Linux tarball, for distros without an AMD repo.
  */
 export async function installLinuxTarball(
   inputs: Inputs,
   fetcher: Fetcher = linuxFetcher
-): Promise<string> {
+): Promise<InstallResult> {
   const family = linuxFamily(inputs.gfx)
   const prefix = tarballPrefix(
     inputs.version,
@@ -107,5 +107,5 @@ export async function installLinuxTarball(
     },
     fetcher
   )
-  return prefix
+  return { root: prefix, cacheHit: false }
 }

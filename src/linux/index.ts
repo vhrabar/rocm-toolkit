@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import type { InstallResult } from '../cache.js'
 import type { Inputs } from '../inputs.js'
 import { fetchCheckedKey } from './key.js'
 import { packageNames } from './packages.js'
@@ -7,13 +8,13 @@ import type { PackageManager } from './types.js'
 
 /**
  * Install ROCm 10.x from the multi-arch package repo. The steps are the same
- * on every distro; only the package manager differs. Returns the prefix.
+ * on every distro; only the package manager differs.
  */
 export async function installMultiArch(
   inputs: Inputs,
   distro: string,
   pm: PackageManager
-): Promise<string> {
+): Promise<InstallResult> {
   const packages = packageNames(
     inputs.version,
     inputs.gfx,
@@ -31,5 +32,5 @@ export async function installMultiArch(
 
   const prefix = installPrefix(inputs.version)
   requireHipcc(prefix)
-  return prefix
+  return { root: prefix, cacheHit: false }
 }

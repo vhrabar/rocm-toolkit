@@ -149,8 +149,8 @@ describe('installLegacy', () => {
   })
 
   it('installs the repo package, then the ROCm packages', async () => {
-    const prefix = await legacy.installLegacy(inputs, 'ubuntu2404')
-    expect(prefix).toBe('/opt/rocm-7.2.4')
+    const result = await legacy.installLegacy(inputs, 'ubuntu2404')
+    expect(result).toEqual({ root: '/opt/rocm-7.2.4', cacheHit: false })
     const debPath = '/tmp/amdgpu-install_7.2.4.70204-1_all.deb'
     expect(tc.downloadTool).toHaveBeenCalledWith(
       'https://repo.radeon.com/amdgpu-install/7.2.4/ubuntu/noble/' +

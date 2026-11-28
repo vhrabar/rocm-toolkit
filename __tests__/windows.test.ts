@@ -102,8 +102,8 @@ describe('installWindows', () => {
       stdin.resume()
       return { stdin, done: new Promise<void>((r) => stdin.on('end', r)) }
     })
-    const prefix = await windows.installWindows(inputs, fetcher)
-    expect(prefix).toBe(PREFIX)
+    const result = await windows.installWindows(inputs, fetcher)
+    expect(result).toEqual({ root: PREFIX, cacheHit: false })
     expect(calls.url).toBe(
       'https://stable.repo.amd.com/rocm/core/tarball/' +
         'therock-dist-windows-gfx120X-all-10.1.0.tar.gz'
@@ -120,7 +120,7 @@ describe('installWindows', () => {
     fsMock.existsSync.mockReturnValue(true)
     fsMock.readFileSync.mockReturnValue('gfx120X-all 10.1.0\n')
     const { fetcher } = fakeFetcher({})
-    expect(await windows.installWindows(inputs, fetcher)).toBe(PREFIX)
+    expect((await windows.installWindows(inputs, fetcher)).root).toBe(PREFIX)
     expect(fetcher.get).not.toHaveBeenCalled()
     expect(fsMock.rmSync).not.toHaveBeenCalled()
   })
